@@ -34,7 +34,21 @@ public:
 
     void evolve1() {
         vector<tuple<int, int>> toggle_cells;
-        apply([this, &toggle_cells](int i) {evolve1(i + 1, toggle_cells); });
+        for (int r = 1; r < h; r++) {
+            for (int c = 1; c <= w; c++) {
+                bool pre = _playground[r][c];
+                int count = (int)_playground[r - 1][c - 1];
+                count += (int)_playground[r - 1][c];
+                count += (int)_playground[r - 1][c + 1];
+                count += (int)_playground[r][c - 1];
+                count += (int)_playground[r][c + 1];
+                count += (int)_playground[r + 1][c - 1];
+                count += (int)_playground[r + 1][c];
+                count += (int)_playground[r + 1][c + 1];
+                bool post = count == 3 || count == 2 && pre;
+                if (post ^ pre) toggle_cells.push_back({ r, c });
+            }
+        }
         for (auto cell : toggle_cells) {
             auto row = cell._Myfirst._Val;
             auto col = cell._Get_rest()._Myfirst._Val;
@@ -78,23 +92,6 @@ private:
             m <<= 1;
         }
     }
-
-    void evolve1(int r, vector<tuple<int, int>>& toggles) {
-        for (int c = 1; c <= w; c++) {
-            bool pre = _playground[r][c];
-            int count = (int)_playground[r - 1][c - 1];
-            count += (int)_playground[r - 1][c];
-            count += (int)_playground[r - 1][c + 1];
-            count += (int)_playground[r][c - 1];
-            count += (int)_playground[r][c + 1];
-            count += (int)_playground[r + 1][c - 1];
-            count += (int)_playground[r + 1][c];
-            count += (int)_playground[r + 1][c + 1];
-            bool post = count == 3 || count == 2 && pre;
-            if (post ^ pre) toggles.push_back({ r, c });
-        }
-    }
-
 };
 
 template <int h, int w>
