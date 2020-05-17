@@ -49,9 +49,7 @@ public:
                 if (post ^ pre) toggle_cells.push_back({ r, c });
             }
         }
-        for (auto cell : toggle_cells) {
-            auto row = cell._Myfirst._Val;
-            auto col = cell._Get_rest()._Myfirst._Val;
+        for (auto [row, col] : toggle_cells) {
             _playground[row][col] = !_playground[row][col];
         }
     }
