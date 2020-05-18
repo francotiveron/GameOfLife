@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <cstdarg>
 #include <tuple>
+#include <set>
 
 using namespace std;
 
@@ -97,13 +98,77 @@ GOL<h, w> build(initializer_list<const char*> def) {
     char** data = new char* [def.size()];
     for (auto [i, j] = tuple{ 0, def.begin() }; j != def.end(); i++, j++) {
         auto d = *j;
-        data[i] = (char*)d;    
+        data[i] = (char*)d;
     }
-        
+
     return GOL<h, w>(data);
 }
 
+using Cell = tuple<int, int>;
+using Organism = vector<Cell>;
+
+class Generation {
+private:
+    Organism _org;
+    int CountAdjacent(int r, int c) {
+        int count = 0;
+        if (find(_org.begin(), _org.end(), Cell{ r - 1, c - 1 }) != _org.end()) ++count;
+        if (find(_org.begin(), _org.end(), Cell{ r - 1, c }) != _org.end()) ++count;
+        if (find(_org.begin(), _org.end(), Cell{ r - 1, c + 1 }) != _org.end()) ++count;
+        if (find(_org.begin(), _org.end(), Cell{ r, c - 1 }) != _org.end()) ++count;
+        if (find(_org.begin(), _org.end(), Cell{ r, c + 1 }) != _org.end()) ++count;
+        if (find(_org.begin(), _org.end(), Cell{ r + 1, c - 1 }) != _org.end()) ++count;
+        if (find(_org.begin(), _org.end(), Cell{ r + 1, c }) != _org.end()) ++count;
+        if (find(_org.begin(), _org.end(), Cell{ r + 1, c + 1 }) != _org.end()) ++count;
+        return count;
+    }
+    int Check(int r, int c, Organism& org, set<Cell>& checked) {
+        int ret = 0;
+        auto cell = Cell{ r, c };
+        if (find(_org.begin(), _org.end(), cell) != _org.end()) ++ret;
+        else {
+            if (checked.find(cell) == checked.end() && CountAdjacent(r, c) == 3) {
+                org.push_back(cell);
+                checked.insert(cell);
+            }
+        }
+        return ret;
+    }
+public:
+    Generation(Organism org) : _org(org) {}
+    void Tick() {
+        Organism org;
+        set<Cell> checked;
+
+        for (auto cell : _org) {
+            int count = 0;
+            auto [r, c] = cell;
+            count += Check(r - 1, c - 1, org, checked);
+            count += Check(r - 1, c, org, checked);
+            count += Check(r - 1, c + 1, org, checked);
+            count += Check(r, c - 1, org, checked);
+            count += Check(r, c + 1, org, checked);
+            count += Check(r + 1, c - 1, org, checked);
+            count += Check(r + 1, c, org, checked);
+            count += Check(r + 1, c + 1, org, checked);
+            if (count == 2 || count == 3) org.push_back(cell);
+        }
+        _org = org;
+    }
+};
+
+
+
 int main() {
+    Generation gen ({
+        Cell(1, 2),
+        Cell(2, 2),
+        Cell(3, 2),
+    });
+
+    gen.Tick();
+
+
     auto blinker =
         build<5, 5>({
             "00000",
